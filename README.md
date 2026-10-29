@@ -125,4 +125,4 @@ The Android app discovers a LAN IPv4 address dynamically; no personal PC or TV I
 
 ## License
 
-No license has been selected for this repository yet. Until a license is added, default copyright rules apply; do not assume the project is openly licensed for redistribution.
+This project is licensed under the [MIT License](LICENSE). See the `LICENSE` file for the full license text.
