@@ -3,80 +3,221 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Miracast AutoConnect — Background Miracast for Windows 10/11</title>
-  <meta name="description" content="Open-source Android TV and Windows project for triggering Miracast projection in the background without opening the Win+K flyout or automating Windows UI.">
+  <title>Miracast AutoConnect — Wireless projection, without the UI</title>
+  <meta name="description" content="An open-source Android TV and Windows project that triggers Miracast projection through a background listener and Windows Runtime APIs.">
   <meta name="robots" content="index,follow">
   <link rel="canonical" href="https://denyssepta.github.io/Miracast-AutoConnect/">
+  <meta name="theme-color" content="#f3f1eb">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Miracast AutoConnect">
-  <meta property="og:description" content="Trigger Windows wireless projection from Android TV without opening Win+K or automating keyboard and mouse input.">
+  <meta property="og:description" content="Trigger Windows wireless projection from Android TV without opening the Win+K flyout or automating keyboard and mouse input.">
   <meta property="og:url" content="https://denyssepta.github.io/Miracast-AutoConnect/">
   <style>
-    :root { color-scheme: dark; --bg:#0b1020; --panel:#121a2d; --text:#edf2ff; --muted:#a9b5ce; --accent:#79a8ff; --line:#273550; }
-    * { box-sizing:border-box; }
-    body { margin:0; background:radial-gradient(ellipse at 20% 0%,#172b50 0,transparent 50%),var(--bg); color:var(--text); font:16px/1.65 system-ui,-apple-system,Segoe UI,sans-serif; }
-    main { max-width:960px; margin:auto; padding:64px 24px 48px; }
-    .eyebrow { color:var(--accent); text-transform:uppercase; letter-spacing:.14em; font-size:.78rem; font-weight:700; }
-    h1 { font-size:clamp(2.4rem,7vw,4.7rem); line-height:1.04; letter-spacing:-.045em; margin:.5rem 0 1.25rem; }
-    h2 { margin-top:0; line-height:1.2; }
-    p { color:var(--muted); }
-    .lead { font-size:1.2rem; max-width:760px; }
-    .actions { display:flex; gap:12px; flex-wrap:wrap; margin:28px 0 44px; }
-    a.button { display:inline-block; text-decoration:none; padding:11px 17px; border-radius:10px; border:1px solid var(--line); color:var(--text); font-weight:650; }
-    a.primary { background:var(--accent); color:#071326; border-color:var(--accent); }
-    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:16px; }
-    .card { background:rgba(18,26,45,.88); border:1px solid var(--line); border-radius:16px; padding:22px; }
-    .card p { margin-bottom:0; }
-    code { color:#d9e5ff; background:#1c2942; border-radius:5px; padding:.12em .35em; }
-    ol { color:var(--muted); padding-left:1.3rem; }
-    li { margin:.5rem 0; }
-    .proof { border-left:3px solid var(--accent); padding:4px 0 4px 18px; margin:30px 0; }
-    footer { border-top:1px solid var(--line); margin-top:52px; padding-top:20px; color:var(--muted); font-size:.9rem; }
-    footer a, .text-link { color:var(--accent); }
+    :root {
+      color-scheme: light;
+      --paper: #f3f1eb;
+      --ink: #171915;
+      --muted: #64675f;
+      --line: #d5d5cc;
+      --panel: #e8e8df;
+      --acid: #d6f45b;
+      --dark: #20231e;
+      --mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.6 var(--sans); -webkit-font-smoothing: antialiased; }
+    a { color: inherit; }
+    .wrap { width: min(1120px, calc(100% - 48px)); margin-inline: auto; }
+    .topbar { height: 76px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); }
+    .brand { display: inline-flex; align-items: center; gap: 11px; text-decoration: none; font-size: .9rem; font-weight: 750; letter-spacing: -.025em; }
+    .mark { width: 27px; height: 27px; display: grid; place-items: center; background: var(--ink); color: var(--acid); font-size: 14px; font-weight: 800; }
+    .toplinks { display: flex; gap: 25px; align-items: center; font-size: .82rem; font-weight: 650; }
+    .toplinks a { text-decoration: none; }
+    .toplinks a:hover, .footer a:hover { text-decoration: underline; text-underline-offset: 4px; }
+    .eyebrow { display: flex; align-items: center; gap: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .12em; font: 700 .7rem/1.4 var(--mono); }
+    .eyebrow:before { content: ""; width: 23px; height: 2px; background: var(--ink); }
+    .hero { padding: 82px 0 76px; display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(340px, .92fr); gap: 64px; align-items: center; }
+    h1 { max-width: 720px; margin: 23px 0 24px; font-size: clamp(3.2rem, 7.4vw, 6.5rem); line-height: .91; letter-spacing: -.085em; font-weight: 760; }
+    h1 span { color: #777a70; }
+    .intro { max-width: 590px; color: #4e5149; font-size: clamp(1.05rem, 1.8vw, 1.22rem); line-height: 1.7; }
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 30px; }
+    .button { display: inline-flex; align-items: center; justify-content: center; gap: 11px; min-height: 46px; padding: 0 16px; border: 1px solid var(--ink); text-decoration: none; font-size: .85rem; font-weight: 750; transition: transform .15s ease, background .15s ease; }
+    .button:hover { transform: translateY(-2px); }
+    .button.primary { background: var(--ink); color: white; }
+    .button.secondary { background: transparent; }
+    .arrow { font-size: 1.1rem; line-height: 1; }
+    .terminal { background: var(--dark); color: #f0f0e8; padding: 0; box-shadow: 9px 9px 0 var(--acid); }
+    .terminal-head { display: flex; align-items: center; justify-content: space-between; padding: 15px 19px; border-bottom: 1px solid #41443c; color: #b7baaf; font: 11px/1.4 var(--mono); }
+    .dots { display: flex; gap: 5px; }
+    .dots i { display: block; width: 7px; height: 7px; border-radius: 50%; background: #74776c; }
+    .terminal-body { padding: 23px 21px 25px; font: 12px/1.9 var(--mono); overflow-wrap: anywhere; }
+    .term-comment { color: #9da394; }
+    .term-green { color: var(--acid); }
+    .term-white { color: #f3f3ea; }
+    .term-dim { color: #b7baaf; }
+    .terminal-rule { border: 0; border-top: 1px solid #41443c; margin: 16px 0; }
+    .signal { display: flex; align-items: center; gap: 10px; color: #c4c8bc; font: 11px/1.5 var(--mono); }
+    .signal b { color: var(--acid); font-weight: 500; }
+    .metrics { display: grid; grid-template-columns: repeat(3, 1fr); border-block: 1px solid var(--line); }
+    .metric { padding: 21px 24px 22px 0; }
+    .metric + .metric { border-left: 1px solid var(--line); padding-left: 24px; }
+    .metric strong { display: block; font-size: 1.06rem; letter-spacing: -.035em; }
+    .metric span { display: block; color: var(--muted); font-size: .78rem; margin-top: 3px; }
+    section.content { padding: 84px 0; }
+    .section-head { display: grid; grid-template-columns: .8fr 1.2fr; gap: 60px; align-items: start; margin-bottom: 38px; }
+    h2 { margin: 12px 0 0; font-size: clamp(2rem, 4vw, 3.45rem); line-height: 1.02; letter-spacing: -.065em; }
+    .section-intro { max-width: 540px; margin: 8px 0 0; color: var(--muted); font-size: 1rem; }
+    .steps { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--ink); }
+    .step { padding: 20px 22px 10px 0; }
+    .step + .step { padding-left: 20px; border-left: 1px solid var(--line); }
+    .num { font: 12px/1.4 var(--mono); color: #777a70; }
+    .step h3 { margin: 31px 0 9px; font-size: 1.12rem; letter-spacing: -.035em; }
+    .step p { margin: 0; color: var(--muted); font-size: .9rem; }
+    .detail-band { background: var(--panel); padding: 42px; display: grid; grid-template-columns: .8fr 1.2fr; gap: 55px; align-items: start; }
+    .detail-band h2 { font-size: clamp(2rem, 3.5vw, 3rem); }
+    .detail-band p { color: var(--muted); }
+    .facts { margin: 0; }
+    .facts div { display: grid; grid-template-columns: 130px 1fr; gap: 16px; padding: 13px 0; border-bottom: 1px solid #cccec4; }
+    .facts div:first-child { border-top: 1px solid #cccec4; }
+    .facts dt { color: var(--muted); font-size: .8rem; }
+    .facts dd { margin: 0; font-size: .88rem; font-weight: 650; }
+    code { font-family: var(--mono); font-size: .9em; }
+    .proof { margin-top: 18px; padding: 23px 26px; border-left: 3px solid var(--ink); background: #e9e8df; }
+    .proof-label { font: 700 .68rem/1.4 var(--mono); letter-spacing: .1em; text-transform: uppercase; }
+    .proof p { margin: 9px 0 0; color: #55584f; font-size: .9rem; }
+    .cta { margin: 78px 0 0; padding: 37px 40px; display: flex; justify-content: space-between; align-items: center; gap: 25px; background: var(--acid); }
+    .cta h2 { font-size: clamp(1.8rem, 3.5vw, 2.6rem); margin: 0; }
+    .cta p { margin: 8px 0 0; color: #454a30; font-size: .9rem; }
+    .cta .button { flex-shrink: 0; }
+    .footer { margin-top: 70px; padding: 22px 0 30px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; gap: 20px; color: var(--muted); font-size: .78rem; }
+    .footer p { margin: 0; }
+    .footer-links { display: flex; flex-wrap: wrap; gap: 18px; }
+    .footer a { text-decoration: none; }
+    @media (max-width: 800px) {
+      .hero { grid-template-columns: 1fr; gap: 42px; padding: 62px 0 55px; }
+      .terminal { max-width: 600px; }
+      .section-head, .detail-band { grid-template-columns: 1fr; gap: 24px; }
+      .steps { grid-template-columns: repeat(2, 1fr); }
+      .step:nth-child(3) { border-left: 0; padding-left: 0; }
+      .step:nth-child(n+3) { border-top: 1px solid var(--line); padding-top: 20px; margin-top: 18px; }
+      .cta { align-items: flex-start; flex-direction: column; }
+    }
+    @media (max-width: 520px) {
+      .wrap { width: min(100% - 32px, 1120px); }
+      .topbar { height: 64px; }
+      .toplinks { gap: 13px; font-size: .75rem; }
+      .toplinks a:first-child { display: none; }
+      .hero { padding-top: 48px; }
+      h1 { font-size: clamp(3.15rem, 16vw, 4.8rem); }
+      .terminal-body { padding: 18px 14px; font-size: 10px; }
+      .metrics { grid-template-columns: 1fr; }
+      .metric, .metric + .metric { padding: 13px 0; border-left: 0; }
+      .metric + .metric { border-top: 1px solid var(--line); }
+      section.content { padding: 58px 0; }
+      .steps { grid-template-columns: 1fr; }
+      .step, .step + .step, .step:nth-child(3) { padding: 18px 0; border-left: 0; border-top: 1px solid var(--line); margin: 0; }
+      .step h3 { margin-top: 12px; }
+      .detail-band { padding: 25px 20px; }
+      .facts div { grid-template-columns: 95px 1fr; }
+      .cta { padding: 27px 23px; margin-top: 50px; }
+      .footer { flex-direction: column; }
+    }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .button { transition: none; } }
   </style>
 </head>
 <body>
-<main>
-  <div class="eyebrow">Open-source project · Android TV + Windows</div>
-  <h1>Miracast<br>AutoConnect</h1>
-  <p class="lead">Trigger a wireless display connection from Android TV to a Windows PC—with a background listener and Windows Runtime projection APIs, without opening the <code>Win+K</code> flyout or automating keyboard and mouse input.</p>
-  <div class="actions">
-    <a class="button primary" href="https://github.com/DenysSepta/Miracast-AutoConnect">View source on GitHub</a>
-    <a class="button" href="https://github.com/DenysSepta/Miracast-AutoConnect#quick-start">Quick-start guide</a>
-    <a class="button" href="https://github.com/DenysSepta/Miracast-AutoConnect/issues">Report an issue</a>
-  </div>
+  <header class="wrap topbar">
+    <a class="brand" href="./" aria-label="Miracast AutoConnect home"><span class="mark">M</span><span>Miracast AutoConnect</span></a>
+    <nav class="toplinks" aria-label="Main navigation">
+      <a href="#how-it-works">How it works</a>
+      <a href="#technical">Technical notes</a>
+      <a href="https://github.com/DenysSepta/Miracast-AutoConnect">GitHub <span aria-hidden="true">↗</span></a>
+    </nav>
+  </header>
 
-  <section class="grid" aria-label="Project features">
-    <article class="card"><h2>Background connection</h2><p>A Windows PowerShell listener receives a local UDP trigger and requests projection through the Windows Runtime <code>ProjectionManager</code> API.</p></article>
-    <article class="card"><h2>Android TV trigger</h2><p>The Android TV app launches the available receiver/settings activity and sends a trigger over the local network.</p></article>
-    <article class="card"><h2>No UI automation</h2><p>The project is designed to avoid the <code>Win+K</code> flyout and simulated keyboard or mouse interaction with Windows UI.</p></article>
-  </section>
+  <main class="wrap">
+    <section class="hero" aria-labelledby="hero-title">
+      <div>
+        <div class="eyebrow">An open-source experiment · Windows + Android TV</div>
+        <h1 id="hero-title">Wireless projection.<br><span>Without the UI.</span></h1>
+        <p class="intro">Trigger a Miracast connection from Android TV to a Windows PC using a background listener and Windows Runtime projection APIs. No opening the <code>Win+K</code> flyout. No simulated keyboard or mouse input.</p>
+        <div class="actions">
+          <a class="button primary" href="https://github.com/DenysSepta/Miracast-AutoConnect">Explore the source <span class="arrow" aria-hidden="true">↗</span></a>
+          <a class="button secondary" href="https://github.com/DenysSepta/Miracast-AutoConnect#quick-start">Read the setup guide <span class="arrow" aria-hidden="true">→</span></a>
+        </div>
+      </div>
 
-  <section style="margin-top:42px">
-    <h2>How it works</h2>
-    <ol>
-      <li>Put the TV into its Miracast receiver or waiting mode.</li>
-      <li>Launch Miracast AutoConnect on Android TV, or use a configured remote-button trigger.</li>
-      <li>The app sends a local-network UDP message to the Windows listener on port <code>8888</code>.</li>
-      <li>The listener searches for the configured display and requests wireless projection.</li>
-      <li>Confirm that the TV displays the Windows desktop; a trigger or API response alone does not prove mirroring is active.</li>
-    </ol>
-  </section>
+      <div class="terminal" aria-label="Illustration of the background trigger flow">
+        <div class="terminal-head"><span>BACKGROUND LISTENER / POWERSHELL</span><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span></div>
+        <div class="terminal-body">
+          <div class="term-comment"># local network trigger</div>
+          <div><span class="term-dim">UDP</span> <span class="term-green">:8888</span> <span class="term-dim">← Android TV</span></div>
+          <div class="term-comment" style="margin-top:15px"># received message</div>
+          <div class="term-white">MS-MICE_CONNECT_REQ:<wbr>192.168.0.221:<wbr>7250</div>
+          <hr class="terminal-rule">
+          <div class="term-comment"># request wireless projection</div>
+          <div><span class="term-green">ProjectionManager</span><span class="term-white">.StartProjectingAsync(...)</span></div>
+          <div class="term-comment" style="margin-top:15px"># actual result depends on device + driver</div>
+          <div class="signal"><b>●</b> <span>Trigger received ≠ mirroring confirmed</span></div>
+        </div>
+      </div>
+    </section>
 
-  <section class="proof">
-    <h2>Verified end-to-end setup</h2>
-    <p>The maintainer has verified actual desktop mirroring on a Xiaomi TV A 65 (2025), running Windows 11 Home build 26300 with a Realtek RTL8852BE Wi-Fi adapter. The background listener and automatic trigger workflow continued working after reboot.</p>
-  </section>
+    <div class="metrics" aria-label="Project summary">
+      <div class="metric"><strong>Windows 10 / 11</strong><span>Wireless display support required</span></div>
+      <div class="metric"><strong>UDP · port 8888</strong><span>Local-network trigger</span></div>
+      <div class="metric"><strong>MIT license</strong><span>Source available on GitHub</span></div>
+    </div>
 
-  <section class="grid">
-    <article class="card"><h2>Requirements</h2><p>Windows 10/11 with wireless projection support, Windows PowerShell 5.1, a compatible Wi-Fi adapter and driver, and a TV firmware that provides a compatible Miracast receiver.</p></article>
-    <article class="card"><h2>Open source</h2><p>Source code, installation steps, network protocol notes, troubleshooting, and contribution instructions are available in the repository. Licensed under MIT.</p></article>
-  </section>
+    <section class="content" id="how-it-works">
+      <div class="section-head">
+        <div><div class="eyebrow">The sequence</div><h2>From TV to desktop.</h2></div>
+        <p class="section-intro">The TV starts the request; a small Windows-side listener handles the trigger and asks the operating system to begin projection. The goal is to remove the manual UI step—not to bypass Miracast compatibility or pairing requirements.</p>
+      </div>
+      <div class="steps">
+        <article class="step"><div class="num">01 / RECEIVER</div><h3>Put the TV in waiting mode</h3><p>Open the TV's Miracast receiver so it is ready to accept a wireless display connection.</p></article>
+        <article class="step"><div class="num">02 / TRIGGER</div><h3>Send the signal</h3><p>Launch the Android TV app or use a configured remote-button trigger to send a message on the local network.</p></article>
+        <article class="step"><div class="num">03 / WINDOWS</div><h3>Request projection</h3><p>The PowerShell listener receives the UDP packet and requests projection through Windows Runtime APIs.</p></article>
+        <article class="step"><div class="num">04 / VERIFY</div><h3>Confirm the picture</h3><p>Check that the Windows desktop is visible on the TV. A received packet or API response alone is not proof of a live session.</p></article>
+      </div>
+    </section>
 
-  <footer>
-    <p>Project maintained by <a href="https://github.com/DenysSepta">DenysSepta</a>.</p>
-    <p><a href="https://github.com/DenysSepta/Miracast-AutoConnect">Source repository</a> · <a href="https://github.com/DenysSepta/Miracast-AutoConnect/blob/main/LICENSE">MIT License</a> · <a href="https://github.com/DenysSepta/Miracast-AutoConnect/blob/main/README.md">Full documentation</a></p>
+    <section class="detail-band" id="technical">
+      <div>
+        <div class="eyebrow">Implementation notes</div>
+        <h2>Built around the real connection path.</h2>
+        <p>This project focuses on initiating projection from a background process rather than scripting the Windows projection flyout.</p>
+      </div>
+      <dl class="facts">
+        <div><dt>Windows side</dt><dd>PowerShell listener + Windows Runtime <code>ProjectionManager</code></dd></div>
+        <div><dt>Trigger</dt><dd>Local UDP message, default port <code>8888</code></dd></div>
+        <div><dt>TV side</dt><dd>Android TV app and compatible Miracast receiver mode</dd></div>
+        <div><dt>Requirements</dt><dd>Compatible Wi-Fi adapter, driver, Windows wireless projection support, and TV firmware</dd></div>
+        <div><dt>Limitations</dt><dd>Device discovery, receiver state, drivers, and network conditions can affect connection success</dd></div>
+      </dl>
+    </section>
+
+    <aside class="proof">
+      <div class="proof-label">Maintainer's test setup</div>
+      <p>End-to-end desktop mirroring has been verified by the maintainer on a Xiaomi TV A 65 (2025) with Windows 11 Home build 26300 and a Realtek RTL8852BE Wi-Fi adapter. The configured background workflow continued working after reboot. Results may differ on other hardware and firmware.</p>
+    </aside>
+
+    <section class="cta">
+      <div><h2>Inspect it. Run it. Improve it.</h2><p>Installation steps, troubleshooting, and implementation details live in the repository.</p></div>
+      <a class="button primary" href="https://github.com/DenysSepta/Miracast-AutoConnect">Open repository <span class="arrow" aria-hidden="true">↗</span></a>
+    </section>
+  </main>
+
+  <footer class="wrap footer">
+    <p>Maintained by <a href="https://github.com/DenysSepta">DenysSepta</a>.</p>
+    <div class="footer-links">
+      <a href="https://github.com/DenysSepta/Miracast-AutoConnect">Source</a>
+      <a href="https://github.com/DenysSepta/Miracast-AutoConnect/blob/main/README.md">Documentation</a>
+      <a href="https://github.com/DenysSepta/Miracast-AutoConnect/issues">Issues</a>
+      <a href="https://github.com/DenysSepta/Miracast-AutoConnect/blob/main/LICENSE">MIT License</a>
+    </div>
   </footer>
-</main>
 </body>
 </html>
