@@ -4,7 +4,7 @@
 
 Miracast AutoConnect combines a small Android TV app with a Windows PowerShell listener. The app opens the TV's available Miracast receiver and sends a local-network trigger; the Windows listener uses the Windows Runtime (`ProjectionManager`) to discover the configured wireless display and request projection.
 
-The maintainer has verified the **complete end-to-end workflow**, including actual Windows desktop mirroring to a **Xiaomi TV A 65 (2025)** from **Windows 11 Home (build 26300)** using a **Realtek RTL8852BE Wi-Fi adapter**. The background listener and automatic trigger workflow also continued working after a Windows reboot. This is a real-device result, not just a successful API call or device-discovery test. Compatibility with other TVs, receiver apps, Windows builds, and Wi-Fi drivers has not been independently verified. Miracast behavior can vary significantly between devices.
+The maintainer has verified the **complete end-to-end workflow**, including actual Windows desktop mirroring to a **Xiaomi TV A 65 (2025)** from **Windows 11 Home (build 26300)** using a **Realtek RTL8852BE Wi-Fi adapter**. The background listener and automatic trigger workflow also continued working after a Windows reboot.
 
 ## Features
 
@@ -43,11 +43,6 @@ This project does not open the `Win+K` flyout and does not automate keyboard/mou
 - **Windows PowerShell 5.1** (`powershell.exe`), not PowerShell 7 (`pwsh.exe`).
 - The TV awake and waiting in its Miracast receiver screen during discovery/connection.
 - For background mode, the listener must run in the logged-in user's interactive session.
-
-### Tested vs. unverified
-
-- **Tested by the maintainer:** full desktop mirroring to a Xiaomi TV A 65 (2025) from Windows 11 Home build 26300 with a Realtek RTL8852BE Wi-Fi adapter; background auto-connect remained functional after reboot.
-- **Not independently verified:** other Xiaomi models, other Android TV brands, third-party receiver apps, different Windows versions/drivers, mesh/guest networks, or VLAN-separated devices.
 
 The app cannot enable a Miracast receiver that is missing, disabled, or blocked by the TV. A successful trigger is only the start of the workflow; device discovery and the actual wireless projection session can still fail.
 
