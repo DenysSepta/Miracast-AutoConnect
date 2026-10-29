@@ -43,7 +43,41 @@ Automatically open the Miracast receiver on a Xiaomi Android TV and request wire
 4. Launch Miracast AutoConnect once to test it.
 5. Optional: bind a remote key to the app using your TV's supported key-mapping method. Some devices require enabling the app's Accessibility service. Enable it only if you understand and want the remote-key filtering behavior.
 
-The current Accessibility service is hard-coded to intercept Android key codes 193 and 194. There is no in-app button picker. To use a different remote key, the key-mapping tool must launch the app directly, or the Kotlin service must be edited to handle the key code your remote actually sends. Whether a remote exposes these codes depends on TV firmware. On the maintainer's Xiaomi TV the end-to-end workflow was tested; other remotes/models still need verification.
+#### Default remote buttons and how to change them
+
+The default key handling is defined in **[`RemoteButtonService.kt`](app/src/main/java/io/github/denyssepta/miracastautoconnect/RemoteButtonService.kt)**. On the maintainer's Xiaomi Android TV remote, the two handled buttons are:
+
+- **Netflix** — Android key code `193` (`KEYCODE_BUTTON_6`)
+- **Prime Video** — Android key code `194` (`KEYCODE_BUTTON_7`)
+
+These are the key codes observed on that Xiaomi setup, not universal Netflix/Prime identifiers. Another TV, remote, or firmware may report different codes. There is currently **no in-app button picker**.
+
+To use your own remote buttons:
+
+1. Open `app/src/main/java/io/github/denyssepta/miracastautoconnect/RemoteButtonService.kt` in Android Studio.
+2. Find the condition inside `onKeyEvent`:
+   
+   ```kotlin
+   if (event.keyCode == 193 || event.keyCode == 194) {
+   ```
+
+3. Replace `193` and `194` with the key codes reported by your remote. For example, if the buttons you want send codes `KEY_A` and `KEY_B`, use their actual numeric codes:
+   
+   ```kotlin
+   if (event.keyCode == 123 || event.keyCode == 124) {
+   ```
+   
+   The numbers `123` and `124` are **illustrative only**; do not use them unless your remote really reports those codes. You can keep one code if you want just one trigger button.
+4. To find the real codes, temporarily add `import android.util.Log` and put this at the start of `onKeyEvent`, before the `if`:
+   
+   ```kotlin
+   Log.d("RemoteButtonService", "keyCode=${event.keyCode}, name=${KeyEvent.keyCodeToString(event.keyCode)}, action=${event.action}")
+   ```
+   
+   Enable the app's Accessibility service on the TV, open Android Studio's **Logcat**, filter by `RemoteButtonService`, and press the desired remote buttons. Use the logged numeric `keyCode` values. If no events appear, that TV/firmware may not expose those remote buttons to the Accessibility service.
+5. Build the app again and install the new APK on the TV. Remove the temporary logging line/import if you no longer need diagnostics.
+
+If you prefer not to edit/rebuild the app, a compatible key-mapping tool may be able to map a button to launch Miracast AutoConnect. Whether that works depends on the TV and the key mapper.
 
 ### 2. Test Windows discovery
 
