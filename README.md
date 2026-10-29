@@ -1,6 +1,6 @@
 # Miracast AutoConnect
 
-Automatically open a compatible Miracast receiver on Android TV and ask a Windows PC to start wireless projection—without manually opening Win+K on the PC.
+Automatically open the Miracast receiver on a Xiaomi Android TV and request wireless projection from Windows—without manually opening Win+K on the PC. The original workflow has been tested by the maintainer on their Xiaomi Android TV and Windows PC; other TV models and firmware may behave differently.
 
 ## Components
 
@@ -11,7 +11,7 @@ Automatically open a compatible Miracast receiver on Android TV and ask a Window
 
 ## How it works
 
-1. Launch the Android TV app, or optionally bind it to a remote shortcut using your TV's supported key-mapping/accessibility options.
+1. Launch the Android TV app, or map a supported remote key to trigger it using a compatible key-mapping tool.
 2. The app attempts to open the receiver screen.
 3. It broadcasts UDP trigger messages to the local network. The default Windows trigger port is 8888; compatibility packets are also sent to port 7250.
 4. The Windows listener matches the configured display name and requests projection through WinRT. It does not open the Win+K flyout or use UI automation.
@@ -43,7 +43,7 @@ Automatically open a compatible Miracast receiver on Android TV and ask a Window
 4. Launch Miracast AutoConnect once to test it.
 5. Optional: bind a remote key to the app using your TV's supported key-mapping method. Some devices require enabling the app's Accessibility service. Enable it only if you understand and want the remote-key filtering behavior.
 
-The Accessibility service handles remote key codes 193 and 194. Whether a remote exposes those codes depends on TV firmware.
+The current Accessibility service is hard-coded to intercept Android key codes 193 and 194. There is no in-app button picker. To use a different remote key, the key-mapping tool must launch the app directly, or the Kotlin service must be edited to handle the key code your remote actually sends. Whether a remote exposes these codes depends on TV firmware. On the maintainer's Xiaomi TV the end-to-end workflow was tested; other remotes/models still need verification.
 
 ### 2. Test Windows discovery
 
