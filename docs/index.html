@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Miracast AutoConnect — Background Miracast for Windows 10/11</title>
+  <meta name="description" content="Open-source Android TV and Windows project for triggering Miracast projection in the background without opening the Win+K flyout or automating Windows UI.">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="https://denyssepta.github.io/Miracast-AutoConnect/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Miracast AutoConnect">
+  <meta property="og:description" content="Trigger Windows wireless projection from Android TV without opening Win+K or automating keyboard and mouse input.">
+  <meta property="og:url" content="https://denyssepta.github.io/Miracast-AutoConnect/">
+  <style>
+    :root { color-scheme: dark; --bg:#0b1020; --panel:#121a2d; --text:#edf2ff; --muted:#a9b5ce; --accent:#79a8ff; --line:#273550; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:radial-gradient(ellipse at 20% 0%,#172b50 0,transparent 50%),var(--bg); color:var(--text); font:16px/1.65 system-ui,-apple-system,Segoe UI,sans-serif; }
+    main { max-width:960px; margin:auto; padding:64px 24px 48px; }
+    .eyebrow { color:var(--accent); text-transform:uppercase; letter-spacing:.14em; font-size:.78rem; font-weight:700; }
+    h1 { font-size:clamp(2.4rem,7vw,4.7rem); line-height:1.04; letter-spacing:-.045em; margin:.5rem 0 1.25rem; }
+    h2 { margin-top:0; line-height:1.2; }
+    p { color:var(--muted); }
+    .lead { font-size:1.2rem; max-width:760px; }
+    .actions { display:flex; gap:12px; flex-wrap:wrap; margin:28px 0 44px; }
+    a.button { display:inline-block; text-decoration:none; padding:11px 17px; border-radius:10px; border:1px solid var(--line); color:var(--text); font-weight:650; }
+    a.primary { background:var(--accent); color:#071326; border-color:var(--accent); }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:16px; }
+    .card { background:rgba(18,26,45,.88); border:1px solid var(--line); border-radius:16px; padding:22px; }
+    .card p { margin-bottom:0; }
+    code { color:#d9e5ff; background:#1c2942; border-radius:5px; padding:.12em .35em; }
+    ol { color:var(--muted); padding-left:1.3rem; }
+    li { margin:.5rem 0; }
+    .proof { border-left:3px solid var(--accent); padding:4px 0 4px 18px; margin:30px 0; }
+    footer { border-top:1px solid var(--line); margin-top:52px; padding-top:20px; color:var(--muted); font-size:.9rem; }
+    footer a, .text-link { color:var(--accent); }
+  </style>
+</head>
+<body>
+<main>
+  <div class="eyebrow">Open-source project · Android TV + Windows</div>
+  <h1>Miracast<br>AutoConnect</h1>
+  <p class="lead">Trigger a wireless display connection from Android TV to a Windows PC—with a background listener and Windows Runtime projection APIs, without opening the <code>Win+K</code> flyout or automating keyboard and mouse input.</p>
+  <div class="actions">
+    <a class="button primary" href="https://github.com/DenysSepta/Miracast-AutoConnect">View source on GitHub</a>
+    <a class="button" href="https://github.com/DenysSepta/Miracast-AutoConnect#quick-start">Quick-start guide</a>
+    <a class="button" href="https://github.com/DenysSepta/Miracast-AutoConnect/issues">Report an issue</a>
+  </div>
+
+  <section class="grid" aria-label="Project features">
+    <article class="card"><h2>Background connection</h2><p>A Windows PowerShell listener receives a local UDP trigger and requests projection through the Windows Runtime <code>ProjectionManager</code> API.</p></article>
+    <article class="card"><h2>Android TV trigger</h2><p>The Android TV app launches the available receiver/settings activity and sends a trigger over the local network.</p></article>
+    <article class="card"><h2>No UI automation</h2><p>The project is designed to avoid the <code>Win+K</code> flyout and simulated keyboard or mouse interaction with Windows UI.</p></article>
+  </section>
+
+  <section style="margin-top:42px">
+    <h2>How it works</h2>
+    <ol>
+      <li>Put the TV into its Miracast receiver or waiting mode.</li>
+      <li>Launch Miracast AutoConnect on Android TV, or use a configured remote-button trigger.</li>
+      <li>The app sends a local-network UDP message to the Windows listener on port <code>8888</code>.</li>
+      <li>The listener searches for the configured display and requests wireless projection.</li>
+      <li>Confirm that the TV displays the Windows desktop; a trigger or API response alone does not prove mirroring is active.</li>
+    </ol>
+  </section>
+
+  <section class="proof">
+    <h2>Verified end-to-end setup</h2>
+    <p>The maintainer has verified actual desktop mirroring on a Xiaomi TV A 65 (2025), running Windows 11 Home build 26300 with a Realtek RTL8852BE Wi-Fi adapter. The background listener and automatic trigger workflow continued working after reboot.</p>
+  </section>
+
+  <section class="grid">
+    <article class="card"><h2>Requirements</h2><p>Windows 10/11 with wireless projection support, Windows PowerShell 5.1, a compatible Wi-Fi adapter and driver, and a TV firmware that provides a compatible Miracast receiver.</p></article>
+    <article class="card"><h2>Open source</h2><p>Source code, installation steps, network protocol notes, troubleshooting, and contribution instructions are available in the repository. Licensed under MIT.</p></article>
+  </section>
+
+  <footer>
+    <p>Project maintained by <a href="https://github.com/DenysSepta">DenysSepta</a>.</p>
+    <p><a href="https://github.com/DenysSepta/Miracast-AutoConnect">Source repository</a> · <a href="https://github.com/DenysSepta/Miracast-AutoConnect/blob/main/LICENSE">MIT License</a> · <a href="https://github.com/DenysSepta/Miracast-AutoConnect/blob/main/README.md">Full documentation</a></p>
+  </footer>
+</main>
+</body>
+</html>
