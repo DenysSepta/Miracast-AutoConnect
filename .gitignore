@@ -1,0 +1,17 @@
+# Gradle / Android Studio
+.gradle/
+**/build/
+local.properties
+.idea/
+*.iml
+.externalNativeBuild/
+.cxx/
+captures/
+.DS_Store
+
+# Local Windows configuration and logs
+*.local.ps1
+*.local.json
+miracast_connect.log
+*.etl
+*.cab
