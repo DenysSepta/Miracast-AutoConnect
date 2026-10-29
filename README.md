@@ -102,7 +102,14 @@ The current Accessibility service is implemented in [`RemoteButtonService.kt`](a
 
 These are the codes observed on that particular Xiaomi setup, not universal identifiers for those buttons. Other remotes or firmware may report different codes. The app currently has **no in-app button picker**.
 
-To change the buttons, edit the `event.keyCode` condition in `RemoteButtonService.kt`, identify the numeric key codes your remote actually sends, then rebuild and reinstall the APK. The README's [remote-button instructions](#default-remote-buttons-and-how-to-change-them) in earlier versions may be useful; for current code, follow the steps in the linked Kotlin file and use Android Studio Logcat to inspect key events. A compatible key-mapping app may also be able to launch Miracast AutoConnect, depending on the TV.
+To change the buttons:
+
+1. Open `RemoteButtonService.kt` in Android Studio and find `if (event.keyCode == 193 || event.keyCode == 194)`.
+2. Temporarily add `import android.util.Log` and log events at the start of `onKeyEvent`: `Log.d("RemoteButtonService", "keyCode=${event.keyCode}, name=${KeyEvent.keyCodeToString(event.keyCode)}, action=${event.action}")`.
+3. Enable the app's Accessibility service, open Android Studio Logcat, filter for `RemoteButtonService`, and press the desired remote buttons. If no events appear, the TV firmware may not expose those keys to the service.
+4. Replace `193` and `194` with the observed numeric codes, then rebuild and reinstall the APK. Remove the temporary logging line/import afterward.
+
+A compatible key-mapping app may instead be able to launch Miracast AutoConnect, depending on the TV.
 
 ## Configuration and network protocol
 
